@@ -32,7 +32,7 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 ### Option 1: Git Clone (Recommended)
 ```bash
 mkdir -p ~/.local/share/plasma/plasmoids/
-git clone https://github.com/PlasmaDrifter/textnote.transp.git ~/.local/share/plasma/plasmoids/local.widget.textnote.transp
+git clone https://github.com/PlasmaDrifter/Widget-textnote.transp.git ~/.local/share/plasma/plasmoids/local.widget.textnote.transp
 ```
 
 ### Option 2: Plasma Package Installer

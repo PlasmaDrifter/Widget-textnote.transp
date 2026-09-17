@@ -1,10 +1,12 @@
 # Transparent Text Note Widget
 
-[![Reddit](https://img.shields.io/badge/Reddit-r%2FPlasmaDrifterProjects-FF4500?style=flat-square&logo=reddit&logoColor=white)](https://reddit.com/r/PlasmaDrifterProjects)
 [![KDE Plasma 6](https://img.shields.io/badge/KDE_Plasma-6.0+-3152A0?style=for-the-badge&logo=kde&logoColor=white)](https://kde.org/plasma-desktop/)
 [![QML](https://img.shields.io/badge/UI-QML%2FQt6-41CD52?style=for-the-badge&logo=qt&logoColor=white)](https://doc.qt.io/qt-6/qtqml-index.html)
 [![Category](https://img.shields.io/badge/Notes%20%26%20Tasks-FFCC00?style=for-the-badge&logo=note&logoColor=white)](https://github.com/PlasmaDrifter)
 [![License](https://img.shields.io/badge/License-GPL-2.0+-blue.svg?style=for-the-badge)](LICENSE)
+
+> [!NOTE]
+> **Community Hub:** Have questions, custom configs, or feature ideas? Join our subreddit community at [**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects)!
 
 A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into any wallpaper.
 

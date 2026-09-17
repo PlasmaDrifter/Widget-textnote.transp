@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-GPL-2.0+-blue.svg?style=for-the-badge)](LICENSE)
 
 > [!NOTE]
-> **Community Hub:** Have questions, custom configs, or feature ideas? Join our subreddit community at [**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects)!
+> **Questions, custom configs, or ideas?** Join us on Reddit at <nobr>[**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects)</nobr>!
 
 A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into any wallpaper.
 

@@ -8,6 +8,8 @@ import org.kde.kirigami as Kirigami
 KCM.SimpleKCM {
     id: generalPage
     
+    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOn
+    
     property string cfg_notePages: plasmoid.configuration.notePages
     property int cfg_currentPage: plasmoid.configuration.currentPage
     property string cfg_noteText: plasmoid.configuration.noteText
@@ -247,8 +249,13 @@ KCM.SimpleKCM {
         QQC2.ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 150
-            QQC2.ScrollBar.vertical.policy: QQC2.ScrollBar.AlwaysOn
-            QQC2.ScrollBar.horizontal.policy: QQC2.ScrollBar.AlwaysOff
+            
+            QQC2.ScrollBar.vertical: QQC2.ScrollBar {
+                policy: QQC2.ScrollBar.AlwaysOn
+            }
+            QQC2.ScrollBar.horizontal: QQC2.ScrollBar {
+                policy: QQC2.ScrollBar.AlwaysOff
+            }
             
             QQC2.TextArea {
                 id: noteTextArea

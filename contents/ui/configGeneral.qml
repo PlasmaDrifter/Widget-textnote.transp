@@ -247,6 +247,8 @@ KCM.SimpleKCM {
         QQC2.ScrollView {
             Layout.fillWidth: true
             Layout.preferredHeight: 150
+            QQC2.ScrollBar.vertical.policy: QQC2.ScrollBar.AlwaysOn
+            QQC2.ScrollBar.horizontal.policy: QQC2.ScrollBar.AlwaysOff
             
             QQC2.TextArea {
                 id: noteTextArea

@@ -23,7 +23,7 @@ PlasmoidItem {
         if (targetArea && Plasmoid.configuration.noteText !== targetArea.text) {
             Plasmoid.configuration.noteText = targetArea.text;
             var b64Text = Qt.btoa(unescape(encodeURIComponent(targetArea.text)));
-            executableDataSource.connectSource("echo '" + b64Text + "' | base64 -d > /home/jmc/.config/plasma-custom-textnote-text.txt; echo 'done'");
+            executableDataSource.connectSource("echo '" + b64Text + "' | base64 -d > \"$HOME/.config/plasma-custom-textnote-text.txt\"; echo 'done'");
         }
     }
 
@@ -98,11 +98,14 @@ PlasmoidItem {
         }
         
         QQC2.ScrollView {
+            id: scrollView
             anchors.fill: parent
             anchors.margins: 10
             
             QQC2.TextArea {
                 id: textArea
+                width: scrollView.availableWidth
+                height: Math.max(implicitHeight, scrollView.availableHeight)
                 text: Plasmoid.configuration.noteText
                 color: Plasmoid.configuration.textColor
                 font.pixelSize: Plasmoid.configuration.textSize
@@ -113,6 +116,27 @@ PlasmoidItem {
                 background: Rectangle {
                     color: "transparent"
                 }
+
+                TapHandler {
+                    id: tapHandler
+                    onTapped: (point) => {
+                        var pos = point.position;
+                        var lineH = (textArea.lineCount > 0 && textArea.contentHeight > 0)
+                            ? (textArea.contentHeight / textArea.lineCount)
+                            : (textArea.font.pixelSize * 1.3);
+                        if (pos.y > textArea.topPadding + textArea.contentHeight || textArea.text.length === 0) {
+                            var clickedRow = Math.max(0, Math.floor((pos.y - textArea.topPadding) / lineH));
+                            var currentLastRow = Math.max(0, textArea.lineCount - 1);
+                            var linesToAdd = clickedRow - (textArea.text.length === 0 ? 0 : currentLastRow);
+                            if (linesToAdd > 0) {
+                                textArea.text = textArea.text + "\n".repeat(linesToAdd);
+                            }
+                            textArea.cursorPosition = textArea.text.length;
+                            textArea.forceActiveFocus();
+                        }
+                    }
+                }
+
                 onTextChanged: {
                     if (!root.disableSave) {
                         saveTimer.restart()
@@ -138,7 +162,7 @@ PlasmoidItem {
     }
 
     Component.onCompleted: {
-        executableDataSource.connectSource("cat /home/jmc/.config/plasma-custom-textnote-text.txt | base64")
+        executableDataSource.connectSource("cat \"$HOME/.config/plasma-custom-textnote-text.txt\" | base64")
     }
 
     Component.onDestruction: {

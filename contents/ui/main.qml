@@ -319,9 +319,9 @@ PlasmoidItem {
             anchors.leftMargin: 8
             anchors.rightMargin: 8
             anchors.bottomMargin: 6
-            height: 26
-            spacing: 2
-            opacity: navHoverArea.hovered ? 0.95 : 0.4
+            height: 24
+            spacing: 4
+            opacity: navHoverArea.hovered ? 0.95 : 0.5
             
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
@@ -331,65 +331,113 @@ PlasmoidItem {
                 id: navHoverArea
             }
 
-            QQC2.ToolButton {
-                id: prevButton
-                implicitWidth: 26
-                implicitHeight: 26
-                icon.name: "go-previous"
-                text: "<"
-                display: icon.name ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextOnly
-                enabled: root.currentPageIndex > 0
-                onClicked: root.switchPage(root.currentPageIndex - 1)
-                QQC2.ToolTip.visible: hovered
-                QQC2.ToolTip.text: i18n("Previous Page")
-            }
-
-            QQC2.Label {
+            // Container for page rectangles that automatically shrink as more pages are added
+            RowLayout {
                 Layout.fillWidth: true
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                text: i18n("Page %1 / %2", root.currentPageIndex + 1, Math.max(1, root.pages.length))
-                color: Plasmoid.configuration.textColor
-                font.pixelSize: Math.max(10, Plasmoid.configuration.textSize - 4)
-                elide: Text.ElideRight
+                Layout.fillHeight: true
+                spacing: Math.max(2, Math.min(4, Math.floor(40 / Math.max(1, root.pages.length))))
+
+                Repeater {
+                    model: root.pages.length
+
+                    Rectangle {
+                        id: pageRect
+                        required property int index
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.maximumWidth: 38
+                        Layout.minimumWidth: 12
+
+                        radius: Math.min(6, Math.max(3, Math.floor(pageRect.width / 4)))
+                        color: root.currentPageIndex === index
+                            ? Plasmoid.configuration.textColor
+                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.12))
+                        border.color: root.currentPageIndex === index
+                            ? Plasmoid.configuration.textColor
+                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(1, 1, 1, 0.25))
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: (pageRect.index + 1)
+                            color: root.currentPageIndex === pageRect.index ? "#1e1e1e" : Plasmoid.configuration.textColor
+                            font.pixelSize: Math.max(8, Math.min(11, Math.floor(pageRect.width * 0.45)))
+                            font.bold: root.currentPageIndex === pageRect.index
+                        }
+
+                        MouseArea {
+                            id: pageMouseArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.switchPage(pageRect.index)
+                            }
+                        }
+
+                        QQC2.ToolTip.visible: pageMouseArea.containsMouse
+                        QQC2.ToolTip.text: i18n("Page %1", pageRect.index + 1)
+                    }
+                }
             }
 
-            QQC2.ToolButton {
-                id: nextButton
-                implicitWidth: 26
-                implicitHeight: 26
-                icon.name: "go-next"
-                text: ">"
-                display: icon.name ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextOnly
-                enabled: root.currentPageIndex < root.pages.length - 1
-                onClicked: root.switchPage(root.currentPageIndex + 1)
-                QQC2.ToolTip.visible: hovered
-                QQC2.ToolTip.text: i18n("Next Page")
-            }
+            // Add Page Button
+            Rectangle {
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                radius: 5
+                color: addMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.3) : Qt.rgba(1, 1, 1, 0.12)
+                border.color: addMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(1, 1, 1, 0.25)
+                border.width: 1
 
-            QQC2.ToolButton {
-                id: addButton
-                implicitWidth: 26
-                implicitHeight: 26
-                icon.name: "list-add"
-                text: "+"
-                display: icon.name ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextOnly
-                onClicked: root.addPage()
-                QQC2.ToolTip.visible: hovered
+                Text {
+                    anchors.centerIn: parent
+                    text: "+"
+                    color: Plasmoid.configuration.textColor
+                    font.pixelSize: 13
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: addMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.addPage()
+                }
+
+                QQC2.ToolTip.visible: addMouseArea.containsMouse
                 QQC2.ToolTip.text: i18n("Add Page")
             }
 
-            QQC2.ToolButton {
-                id: deleteButton
-                implicitWidth: 26
-                implicitHeight: 26
-                icon.name: "list-remove"
-                text: "-"
-                display: icon.name ? QQC2.AbstractButton.IconOnly : QQC2.AbstractButton.TextOnly
-                enabled: root.pages.length > 1
+            // Delete Page Button (visible if > 1 page)
+            Rectangle {
                 visible: root.pages.length > 1
-                onClicked: root.deletePage(root.currentPageIndex)
-                QQC2.ToolTip.visible: hovered
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                radius: 5
+                color: delMouseArea.containsMouse ? Qt.rgba(1, 0.2, 0.2, 0.4) : Qt.rgba(1, 1, 1, 0.12)
+                border.color: delMouseArea.containsMouse ? Qt.rgba(1, 0.3, 0.3, 0.7) : Qt.rgba(1, 1, 1, 0.25)
+                border.width: 1
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "-"
+                    color: delMouseArea.containsMouse ? "#ff6b6b" : Plasmoid.configuration.textColor
+                    font.pixelSize: 14
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: delMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.deletePage(root.currentPageIndex)
+                }
+
+                QQC2.ToolTip.visible: delMouseArea.containsMouse
                 QQC2.ToolTip.text: i18n("Delete Current Page")
             }
         }

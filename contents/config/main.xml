@@ -50,5 +50,11 @@ d5acd6
         <entry name="fontWeight" type="Int">
             <default>0</default>
         </entry>
+        <entry name="notePages" type="String">
+            <default></default>
+        </entry>
+        <entry name="currentPage" type="Int">
+            <default>0</default>
+        </entry>
     </group>
 </kcfg>

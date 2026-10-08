@@ -351,17 +351,17 @@ PlasmoidItem {
 
                         radius: Math.min(6, Math.max(3, Math.floor(pageRect.width / 4)))
                         color: root.currentPageIndex === index
-                            ? Plasmoid.configuration.textColor
-                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.12))
+                            ? Qt.alpha(Plasmoid.configuration.textColor, 0.35)
+                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.1))
                         border.color: root.currentPageIndex === index
                             ? Plasmoid.configuration.textColor
-                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(1, 1, 1, 0.25))
-                        border.width: 1
+                            : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.2))
+                        border.width: root.currentPageIndex === index ? 1.5 : 1
 
                         Text {
                             anchors.centerIn: parent
                             text: (pageRect.index + 1)
-                            color: root.currentPageIndex === pageRect.index ? "#1e1e1e" : Plasmoid.configuration.textColor
+                            color: Plasmoid.configuration.textColor
                             font.pixelSize: Math.max(8, Math.min(11, Math.floor(pageRect.width * 0.45)))
                             font.bold: root.currentPageIndex === pageRect.index
                         }
@@ -382,12 +382,13 @@ PlasmoidItem {
                 }
             }
 
-            // Add Page Button
+            // Add Page Button at far right
             Rectangle {
+                Layout.alignment: Qt.AlignRight
                 Layout.preferredWidth: 22
                 Layout.preferredHeight: 22
                 radius: 5
-                color: addMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.3) : Qt.rgba(1, 1, 1, 0.12)
+                color: addMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.1)
                 border.color: addMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(1, 1, 1, 0.25)
                 border.width: 1
 
@@ -409,36 +410,6 @@ PlasmoidItem {
 
                 QQC2.ToolTip.visible: addMouseArea.containsMouse
                 QQC2.ToolTip.text: i18n("Add Page")
-            }
-
-            // Delete Page Button (visible if > 1 page)
-            Rectangle {
-                visible: root.pages.length > 1
-                Layout.preferredWidth: 22
-                Layout.preferredHeight: 22
-                radius: 5
-                color: delMouseArea.containsMouse ? Qt.rgba(1, 0.2, 0.2, 0.4) : Qt.rgba(1, 1, 1, 0.12)
-                border.color: delMouseArea.containsMouse ? Qt.rgba(1, 0.3, 0.3, 0.7) : Qt.rgba(1, 1, 1, 0.25)
-                border.width: 1
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "-"
-                    color: delMouseArea.containsMouse ? "#ff6b6b" : Plasmoid.configuration.textColor
-                    font.pixelSize: 14
-                    font.bold: true
-                }
-
-                MouseArea {
-                    id: delMouseArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.deletePage(root.currentPageIndex)
-                }
-
-                QQC2.ToolTip.visible: delMouseArea.containsMouse
-                QQC2.ToolTip.text: i18n("Delete Current Page")
             }
         }
         

@@ -24,22 +24,18 @@ KCM.SimpleKCM {
     function initPages() {
         internalChange = true;
         var raw = generalPage.cfg_notePages;
-        if (raw && raw.length > 0) {
+        var loaded = null;
+        if (raw) {
             try {
                 var parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    pagesList = parsed.map(function(p) {
+                    loaded = parsed.map(function(p) {
                         return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : p;
                     });
-                } else {
-                    pagesList = [generalPage.cfg_noteText || ""];
                 }
-            } catch(e) {
-                pagesList = [generalPage.cfg_noteText || ""];
-            }
-        } else {
-            pagesList = [generalPage.cfg_noteText || ""];
+            } catch (e) {}
         }
+        pagesList = loaded || [generalPage.cfg_noteText || ""];
         activePageIndex = Math.min(Math.max(0, generalPage.cfg_currentPage || 0), pagesList.length - 1);
         refreshComboModel();
         noteTextArea.text = pagesList[activePageIndex] || "";
@@ -158,26 +154,9 @@ KCM.SimpleKCM {
             Kirigami.FormData.label: "Font Family:"
             model: Qt.fontFamilies().sort()
             Layout.fillWidth: true
-            
-            Component.onCompleted: {
-                var idx = model.indexOf(generalPage.cfg_fontFamily)
-                if (idx !== -1) {
-                    currentIndex = idx
-                }
-            }
-            
+            currentIndex: Math.max(0, model.indexOf(generalPage.cfg_fontFamily))
             onActivated: {
                 generalPage.cfg_fontFamily = currentText
-            }
-        }
-
-        Connections {
-            target: generalPage
-            function onCfg_fontFamilyChanged() {
-                var idx = fontFamilyCombo.model.indexOf(generalPage.cfg_fontFamily)
-                if (idx !== -1) {
-                    fontFamilyCombo.currentIndex = idx
-                }
             }
         }
 

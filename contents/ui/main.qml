@@ -14,7 +14,7 @@ PlasmoidItem {
     
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
-    property bool disableSave: true
+    property bool disableSave: false
     property Item textAreaInstance: null
     readonly property var fontWeights: [400, 500, 600, 700]
 
@@ -23,23 +23,19 @@ PlasmoidItem {
     readonly property string pageBreakDelimiter: "\n\n--- PAGE BREAK ---\n\n"
 
     function initPages() {
-        var rawPages = Plasmoid.configuration.notePages;
-        if (rawPages && rawPages.length > 0) {
+        var raw = Plasmoid.configuration.notePages;
+        var loaded = null;
+        if (raw) {
             try {
-                var parsed = JSON.parse(rawPages);
+                var parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    root.pages = parsed.map(function(p) {
+                    loaded = parsed.map(function(p) {
                         return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : p;
                     });
-                } else {
-                    root.pages = [Plasmoid.configuration.noteText || ""];
                 }
-            } catch(e) {
-                root.pages = [Plasmoid.configuration.noteText || ""];
-            }
-        } else {
-            root.pages = [Plasmoid.configuration.noteText || ""];
+            } catch (e) {}
         }
+        root.pages = loaded || [Plasmoid.configuration.noteText || ""];
 
         var savedCurrent = Plasmoid.configuration.currentPage !== undefined ? Plasmoid.configuration.currentPage : 0;
         root.currentPageIndex = Math.min(Math.max(0, savedCurrent), root.pages.length - 1);
@@ -51,17 +47,20 @@ PlasmoidItem {
         }
     }
 
-    function saveNote() {
-        if (root.disableSave) return;
-        var targetArea = root.textAreaInstance;
-        if (targetArea) {
-            var currentText = targetArea.text;
+    function syncCurrentText() {
+        if (root.textAreaInstance) {
+            var currentText = root.textAreaInstance.text;
             if (root.pages[root.currentPageIndex] !== currentText) {
-                var updatedPages = root.pages.slice();
-                updatedPages[root.currentPageIndex] = currentText;
-                root.pages = updatedPages;
+                var updated = root.pages.slice();
+                updated[root.currentPageIndex] = currentText;
+                root.pages = updated;
             }
         }
+    }
+
+    function saveNote() {
+        if (root.disableSave) return;
+        syncCurrentText();
 
         Plasmoid.configuration.notePages = JSON.stringify(root.pages);
         Plasmoid.configuration.currentPage = root.currentPageIndex;
@@ -76,13 +75,7 @@ PlasmoidItem {
 
     function switchPage(newIndex) {
         if (newIndex < 0 || newIndex >= root.pages.length || newIndex === root.currentPageIndex) return;
-
-        if (root.textAreaInstance) {
-            var currentText = root.textAreaInstance.text;
-            var updatedPages = root.pages.slice();
-            updatedPages[root.currentPageIndex] = currentText;
-            root.pages = updatedPages;
-        }
+        syncCurrentText();
 
         root.currentPageIndex = newIndex;
         Plasmoid.configuration.currentPage = newIndex;
@@ -98,12 +91,7 @@ PlasmoidItem {
     }
 
     function addPage() {
-        if (root.textAreaInstance) {
-            var currentText = root.textAreaInstance.text;
-            var updatedPages = root.pages.slice();
-            updatedPages[root.currentPageIndex] = currentText;
-            root.pages = updatedPages;
-        }
+        syncCurrentText();
 
         var newPagesList = root.pages.slice();
         newPagesList.push("");
@@ -166,65 +154,42 @@ PlasmoidItem {
         onNewData: (sourceName, data) => {
             disconnectSource(sourceName)
 
-            if (sourceName.indexOf("plasma-custom-textnote-text.txt") !== -1) {
-                if (sourceName.indexOf("cat ") !== -1) {
-                    var stdout = data["stdout"] || "";
-                    var b64Text = stdout.replace(/\s+/g, '');
-                    if (b64Text.length > 0) {
-                        try {
-                            var decodedText = decodeURIComponent(escape(Qt.atob(b64Text)));
-                            var loadedPages = [];
-                            if (decodedText.indexOf("--- PAGE BREAK ---") !== -1) {
-                                var rawParts = decodedText.split("--- PAGE BREAK ---");
-                                for (var i = 0; i < rawParts.length; i++) {
-                                    var p = rawParts[i];
-                                    if (p.startsWith("\r\n\r\n")) p = p.substring(4);
-                                    else if (p.startsWith("\n\n")) p = p.substring(2);
-                                    else if (p.startsWith("\r\n")) p = p.substring(2);
-                                    else if (p.startsWith("\n")) p = p.substring(1);
-
-                                    if (p.endsWith("\r\n\r\n")) p = p.substring(0, p.length - 4);
-                                    else if (p.endsWith("\n\n")) p = p.substring(0, p.length - 2);
-                                    else if (p.endsWith("\r\n")) p = p.substring(0, p.length - 2);
-                                    else if (p.endsWith("\n")) p = p.substring(0, p.length - 1);
-
-                                    if (p.trim() === "--- PAGE BREAK ---") {
-                                        p = "";
-                                    }
-                                    loadedPages.push(p);
+            if (sourceName.indexOf("plasma-custom-textnote-text.txt") !== -1 && sourceName.indexOf("cat ") !== -1) {
+                var stdout = data["stdout"] || "";
+                var b64Text = stdout.replace(/\s+/g, '');
+                if (b64Text.length > 0) {
+                    try {
+                        var decodedText = decodeURIComponent(escape(Qt.atob(b64Text)));
+                        var loadedPages = [];
+                        if (decodedText.indexOf("--- PAGE BREAK ---") !== -1) {
+                            var rawParts = decodedText.split("--- PAGE BREAK ---");
+                            for (var i = 0; i < rawParts.length; i++) {
+                                var p = rawParts[i].replace(/^[\r\n]+/, '').replace(/[\r\n]+$/, '');
+                                if (p.trim() === "--- PAGE BREAK ---") {
+                                    p = "";
                                 }
-                            } else {
-                                loadedPages = [decodedText];
+                                loadedPages.push(p);
                             }
-                            if (loadedPages.length > 0) {
-                                root.disableSave = true;
-                                root.pages = loadedPages;
-                                root.currentPageIndex = Math.min(root.currentPageIndex, loadedPages.length - 1);
-                                if (root.textAreaInstance) {
-                                    root.textAreaInstance.text = loadedPages[root.currentPageIndex] || "";
-                                }
-                                Plasmoid.configuration.notePages = JSON.stringify(loadedPages);
-                                Plasmoid.configuration.currentPage = root.currentPageIndex;
-                                Plasmoid.configuration.noteText = loadedPages[0] || "";
-                                root.disableSave = false;
-                            }
-                        } catch(e) {
-                            console.log("Error decoding text note: " + e);
+                        } else {
+                            loadedPages = [decodedText];
                         }
+                        if (loadedPages.length > 0) {
+                            root.disableSave = true;
+                            root.pages = loadedPages;
+                            root.currentPageIndex = Math.min(root.currentPageIndex, loadedPages.length - 1);
+                            if (root.textAreaInstance) {
+                                root.textAreaInstance.text = loadedPages[root.currentPageIndex] || "";
+                            }
+                            Plasmoid.configuration.notePages = JSON.stringify(loadedPages);
+                            Plasmoid.configuration.currentPage = root.currentPageIndex;
+                            Plasmoid.configuration.noteText = loadedPages[0] || "";
+                            root.disableSave = false;
+                        }
+                    } catch(e) {
+                        console.log("Error decoding text note: " + e);
                     }
-                    root.disableSave = false;
                 }
             }
-        }
-    }
-
-    Timer {
-        id: startupEnableTimer
-        interval: 1000
-        running: true
-        repeat: false
-        onTriggered: {
-            root.disableSave = false;
         }
     }
     

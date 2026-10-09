@@ -7,33 +7,7 @@
     
     <group name="General">
         <entry name="noteText" type="String">
-            <default>nohup plasmashell --replace &gt; /dev/null 2&gt;&amp;1 &amp;
-
-gmount
-gunmount
-__________________________
-
-DMV-Medical 5/27
-
-yellow=trailer
-red=truck
-__________________________
-pavucontrol
-
-agy
-copilot
-
-Thinkpad - Rewq1525
-152555
-
-/models
-/usage
-
-ff00ff
-55ffff
-504646
-d5acd6
-</default>
+            <default></default>
         </entry>
         <entry name="textColor" type="Color">
             <default>#d5acd6</default>

@@ -15,7 +15,7 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 
 ### Screenshots
 
-| Single Page (Clean View) | Two Pages Navigation |
+| **Single Page (Clean View)** | **Two Pages Navigation** |
 | :---: | :---: |
 | ![Single Page Note](note-single-page.png) | ![Two Pages Note](note-two-pages.png) |
 | **Multi-Page Note (5 Pages)** | **Configuration Settings** |

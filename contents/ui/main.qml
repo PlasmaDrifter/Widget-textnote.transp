@@ -305,7 +305,7 @@ PlasmoidItem {
             anchors.bottomMargin: 6
             height: 24
             spacing: 4
-            opacity: navHoverArea.hovered ? 0.95 : 0.5
+            opacity: root.pages.length > 1 ? (navHoverArea.hovered ? 0.95 : 0.5) : (navHoverArea.hovered ? 0.95 : 0.0)
             
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
@@ -317,6 +317,7 @@ PlasmoidItem {
 
             // Container for page rectangles that automatically shrink as more pages are added
             RowLayout {
+                visible: root.pages.length > 1
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 spacing: Math.max(2, Math.min(4, Math.floor(40 / Math.max(1, root.pages.length))))
@@ -364,6 +365,11 @@ PlasmoidItem {
                         QQC2.ToolTip.text: i18n("Page %1", pageRect.index + 1)
                     }
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                visible: root.pages.length <= 1
             }
 
             // Add Page Button at far right

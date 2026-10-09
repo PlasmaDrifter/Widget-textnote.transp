@@ -18,7 +18,6 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 - **Click-to-Type**: Click anywhere in the empty space below existing text to start typing
 - **Auto-Saving**: Automatic persistence across system restarts and reboots
 - **Customizable**: Text color, font size, font family, font weight, and background opacity
-- **Scrollable Configuration**: Settings dialog features full vertical scrollbar support for viewing and editing long notes
 
 ---
 

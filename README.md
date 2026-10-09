@@ -7,9 +7,6 @@
 
 A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into any wallpaper.
 
-> [!NOTE]
-> **Questions, custom configs, or ideas?** Join us on Reddit at <nobr>[**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects)</nobr>!
-
 ---
 
 ## Previews

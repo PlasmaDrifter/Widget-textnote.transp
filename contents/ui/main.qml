@@ -28,7 +28,9 @@ PlasmoidItem {
             try {
                 var parsed = JSON.parse(rawPages);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    root.pages = parsed;
+                    root.pages = parsed.map(function(p) {
+                        return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : p;
+                    });
                 } else {
                     root.pages = [Plasmoid.configuration.noteText || ""];
                 }
@@ -173,7 +175,24 @@ PlasmoidItem {
                             var decodedText = decodeURIComponent(escape(Qt.atob(b64Text)));
                             var loadedPages = [];
                             if (decodedText.indexOf("--- PAGE BREAK ---") !== -1) {
-                                loadedPages = decodedText.split(/[\r\n]+--- PAGE BREAK ---[\r\n]+/);
+                                var rawParts = decodedText.split("--- PAGE BREAK ---");
+                                for (var i = 0; i < rawParts.length; i++) {
+                                    var p = rawParts[i];
+                                    if (p.startsWith("\r\n\r\n")) p = p.substring(4);
+                                    else if (p.startsWith("\n\n")) p = p.substring(2);
+                                    else if (p.startsWith("\r\n")) p = p.substring(2);
+                                    else if (p.startsWith("\n")) p = p.substring(1);
+
+                                    if (p.endsWith("\r\n\r\n")) p = p.substring(0, p.length - 4);
+                                    else if (p.endsWith("\n\n")) p = p.substring(0, p.length - 2);
+                                    else if (p.endsWith("\r\n")) p = p.substring(0, p.length - 2);
+                                    else if (p.endsWith("\n")) p = p.substring(0, p.length - 1);
+
+                                    if (p.trim() === "--- PAGE BREAK ---") {
+                                        p = "";
+                                    }
+                                    loadedPages.push(p);
+                                }
                             } else {
                                 loadedPages = [decodedText];
                             }

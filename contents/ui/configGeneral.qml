@@ -28,7 +28,9 @@ KCM.SimpleKCM {
             try {
                 var parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    pagesList = parsed;
+                    pagesList = parsed.map(function(p) {
+                        return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : p;
+                    });
                 } else {
                     pagesList = [generalPage.cfg_noteText || ""];
                 }

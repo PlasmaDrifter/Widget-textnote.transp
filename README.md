@@ -14,16 +14,28 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 
 ## Previews
 
-![Transparent Text Note Widget Preview](desktop-1.png)
+![Transparent Text Note Desktop Preview](desktop-1.png)
+
+### Screenshots
+
+| Single Page (Clean View) | Two Pages Navigation |
+| :---: | :---: |
+| ![Single Page Note](note-single-page.png) | ![Two Pages Note](note-two-pages.png) |
+| **Multi-Page Note (5 Pages)** | **Configuration Settings** |
+| ![Multi-Page Note](note-multi-page.png) | ![Settings Dialog](note-settings.png) |
 
 ---
 
 ## Features
 
-- **Transparent**: background with zero card borders
-- **Rich**: text formatting support
-- **Auto-saving**: notes across system reboots
-- **Custom**: font size and text color configuration
+- **Transparent**: Minimalist background with zero card borders and customizable opacity
+- **Multi-Page Notes**: Easily create and switch across multiple note pages
+- **Clean Single-Page Mode**: Page indicator automatically hides when only 1 page exists
+- **Keyboard Shortcuts**: Rapid page navigation using `Alt + Left/Right` or `Alt + PgUp/PgDown`
+- **Click-to-Type**: Click anywhere in the empty space below existing text to start typing
+- **Auto-Saving**: Automatic persistence across system restarts and reboots
+- **Customizable**: Text color, font size, font family, font weight, and background opacity
+- **Scrollable Configuration**: Settings dialog features full vertical scrollbar support for viewing and editing long notes
 
 ## Requirements
 
@@ -52,8 +64,8 @@ Then right-click your desktop or panel $\rightarrow$ **Add Widgets...** and sear
 
 ---
 
-## 💬 Community & Discussions
+## Community & Discussions
 
 Got questions, setup ideas, or feedback?
 
-* 🌐 Join our subreddit at [**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects) to discuss updates, get support, and share configurations.
+* Join our subreddit at [**r/PlasmaDrifterProjects**](https://reddit.com/r/PlasmaDrifterProjects) to discuss updates, get support, and share configurations.

@@ -360,9 +360,6 @@ PlasmoidItem {
                                 root.switchPage(pageRect.index)
                             }
                         }
-
-                        QQC2.ToolTip.visible: pageMouseArea.containsMouse
-                        QQC2.ToolTip.text: i18n("Page %1", pageRect.index + 1)
                     }
                 }
             }
@@ -397,9 +394,6 @@ PlasmoidItem {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.addPage()
                 }
-
-                QQC2.ToolTip.visible: addMouseArea.containsMouse
-                QQC2.ToolTip.text: i18n("Add Page")
             }
         }
         

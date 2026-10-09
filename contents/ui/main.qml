@@ -303,7 +303,7 @@ PlasmoidItem {
             anchors.leftMargin: 8
             anchors.rightMargin: 8
             anchors.bottomMargin: 6
-            height: 24
+            height: 22
             spacing: 4
             opacity: root.pages.length > 1 ? (navHoverArea.hovered ? 0.95 : 0.5) : (navHoverArea.hovered ? 0.95 : 0.0)
             
@@ -319,7 +319,8 @@ PlasmoidItem {
             RowLayout {
                 visible: root.pages.length > 1
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.preferredHeight: 22
+                Layout.alignment: Qt.AlignVCenter
                 spacing: Math.max(2, Math.min(4, Math.floor(40 / Math.max(1, root.pages.length))))
 
                 Repeater {
@@ -330,18 +331,21 @@ PlasmoidItem {
                         required property int index
 
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: 22
+                        Layout.maximumHeight: 22
+                        Layout.minimumHeight: 22
                         Layout.maximumWidth: 38
                         Layout.minimumWidth: 12
+                        Layout.alignment: Qt.AlignVCenter
 
-                        radius: Math.min(6, Math.max(3, Math.floor(pageRect.width / 4)))
+                        radius: Math.min(5, Math.max(3, Math.floor(pageRect.width / 4)))
                         color: root.currentPageIndex === index
-                            ? Qt.alpha(Plasmoid.configuration.textColor, 0.35)
+                            ? Qt.alpha(Plasmoid.configuration.textColor, 0.2)
                             : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Qt.rgba(1, 1, 1, 0.1))
                         border.color: root.currentPageIndex === index
-                            ? Plasmoid.configuration.textColor
+                            ? Qt.alpha(Plasmoid.configuration.textColor, 0.55)
                             : (pageMouseArea.containsMouse ? Qt.rgba(1, 1, 1, 0.45) : Qt.rgba(1, 1, 1, 0.2))
-                        border.width: root.currentPageIndex === index ? 1.5 : 1
+                        border.width: 1
 
                         Text {
                             anchors.centerIn: parent
@@ -371,7 +375,7 @@ PlasmoidItem {
 
             // Add Page Button at far right
             Rectangle {
-                Layout.alignment: Qt.AlignRight
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 Layout.preferredWidth: 22
                 Layout.preferredHeight: 22
                 radius: 5

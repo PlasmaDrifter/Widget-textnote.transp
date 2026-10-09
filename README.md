@@ -9,6 +9,19 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 
 ---
 
+## Features
+
+- **Transparent**: Minimalist background with zero card borders and customizable opacity
+- **Multi-Page Notes**: Easily create and switch across multiple note pages
+- **Clean Single-Page Mode**: Page indicator automatically hides when only 1 page exists
+- **Keyboard Shortcuts**: Rapid page navigation using `Alt + Left/Right` or `Alt + PgUp/PgDown`
+- **Click-to-Type**: Click anywhere in the empty space below existing text to start typing
+- **Auto-Saving**: Automatic persistence across system restarts and reboots
+- **Customizable**: Text color, font size, font family, font weight, and background opacity
+- **Scrollable Configuration**: Settings dialog features full vertical scrollbar support for viewing and editing long notes
+
+---
+
 ## Previews
 
 ![Transparent Text Note Desktop Preview](desktop-1.png)
@@ -22,17 +35,6 @@ A transparent sticky note widget for KDE Plasma 6 that blends seamlessly into an
 | ![Multi-Page Note](note-multi-page.png) | ![Settings Dialog](note-settings.png) |
 
 ---
-
-## Features
-
-- **Transparent**: Minimalist background with zero card borders and customizable opacity
-- **Multi-Page Notes**: Easily create and switch across multiple note pages
-- **Clean Single-Page Mode**: Page indicator automatically hides when only 1 page exists
-- **Keyboard Shortcuts**: Rapid page navigation using `Alt + Left/Right` or `Alt + PgUp/PgDown`
-- **Click-to-Type**: Click anywhere in the empty space below existing text to start typing
-- **Auto-Saving**: Automatic persistence across system restarts and reboots
-- **Customizable**: Text color, font size, font family, font weight, and background opacity
-- **Scrollable Configuration**: Settings dialog features full vertical scrollbar support for viewing and editing long notes
 
 ## Requirements
 

@@ -8,8 +8,6 @@ import org.kde.kirigami as Kirigami
 KCM.SimpleKCM {
     id: generalPage
     
-    verticalScrollBarPolicy: Qt.ScrollBarAlwaysOn
-    
     property string cfg_notePages: plasmoid.configuration.notePages
     property int cfg_currentPage: plasmoid.configuration.currentPage
     property string cfg_noteText: plasmoid.configuration.noteText
@@ -111,6 +109,7 @@ KCM.SimpleKCM {
     }
     
     Kirigami.FormLayout {
+        anchors.fill: parent
         
         RowLayout {
             Kirigami.FormData.label: "Text Color:"
@@ -240,25 +239,18 @@ KCM.SimpleKCM {
             }
         }
         
-        QQC2.Label {
+        QQC2.TextArea {
+            id: noteTextArea
             Kirigami.FormData.label: i18n("Page Content:")
-            text: i18n("Edit note content for the selected page:")
-            font.italic: true
-        }
-        
-        QQC2.ScrollView {
-            id: noteScrollView
+            Kirigami.FormData.labelAlignment: Qt.AlignTop
+            placeholderText: i18n("Edit note content for the selected page…")
             Layout.fillWidth: true
-            Layout.preferredHeight: 180
-            clip: true
-
-            QQC2.TextArea {
-                id: noteTextArea
-                width: noteScrollView.availableWidth
-                wrapMode: QQC2.TextArea.Wrap
-                onTextChanged: {
-                    generalPage.saveCurrentPage(text);
-                }
+            wrapMode: QQC2.TextArea.Wrap
+            selectByMouse: true
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 12
+            implicitHeight: Math.max(Layout.minimumHeight, contentHeight + topPadding + bottomPadding)
+            onTextChanged: {
+                generalPage.saveCurrentPage(text);
             }
         }
     }

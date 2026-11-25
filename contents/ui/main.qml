@@ -15,14 +15,34 @@ PlasmoidItem {
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
     property bool disableSave: false
-    property Item textAreaInstance: null
+    property bool isApplyingConfig: false
+    property bool hasUnsavedChanges: false
+    property bool kconfigHadData: false
+    property QQC2.TextArea textAreaInstance: null
     readonly property var fontWeights: [400, 500, 600, 700]
 
     property var pages: [""]
     property int currentPageIndex: 0
     readonly property string pageBreakDelimiter: "\n\n--- PAGE BREAK ---\n\n"
 
+    function applyCurrentPageToEditor() {
+        if (root.textAreaInstance) {
+            root.disableSave = true;
+            root.textAreaInstance.text = root.pages[root.currentPageIndex] || "";
+            root.textAreaInstance.cursorPosition = 0;
+            root.disableSave = false;
+        }
+    }
+
+    function writeBackupFile() {
+        var combinedText = root.pages.join(root.pageBreakDelimiter);
+        var b64Text = Qt.btoa(unescape(encodeURIComponent(combinedText)));
+        executableDataSource.connectSource("tmp=\"$HOME/.config/.plasma-custom-textnote-text.tmp.$$\" && printf '%s' '" + b64Text + "' | base64 -d > \"$tmp\" && mv -f \"$tmp\" \"$HOME/.config/plasma-custom-textnote-text.txt\"");
+    }
+
     function initPages() {
+        if (root.isApplyingConfig) return;
+
         var raw = Plasmoid.configuration.notePages;
         var loaded = null;
         if (raw) {
@@ -30,21 +50,22 @@ PlasmoidItem {
                 var parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     loaded = parsed.map(function(p) {
-                        return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : p;
+                        return (typeof p === "string" && p.trim() === "--- PAGE BREAK ---") ? "" : String(p || "");
                     });
                 }
             } catch (e) {}
+        }
+        if (loaded && loaded.some(function(p) { return p.length > 0; })) {
+            root.kconfigHadData = true;
+        } else if ((Plasmoid.configuration.noteText || "").length > 0) {
+            root.kconfigHadData = true;
         }
         root.pages = loaded || [Plasmoid.configuration.noteText || ""];
 
         var savedCurrent = Plasmoid.configuration.currentPage !== undefined ? Plasmoid.configuration.currentPage : 0;
         root.currentPageIndex = Math.min(Math.max(0, savedCurrent), root.pages.length - 1);
-
-        if (root.textAreaInstance) {
-            root.disableSave = true;
-            root.textAreaInstance.text = root.pages[root.currentPageIndex] || "";
-            root.disableSave = false;
-        }
+        root.hasUnsavedChanges = false;
+        applyCurrentPageToEditor();
     }
 
     function syncCurrentText() {
@@ -60,17 +81,20 @@ PlasmoidItem {
 
     function saveNote() {
         if (root.disableSave) return;
+        saveTimer.stop();
         syncCurrentText();
 
+        root.isApplyingConfig = true;
         Plasmoid.configuration.notePages = JSON.stringify(root.pages);
         Plasmoid.configuration.currentPage = root.currentPageIndex;
         if (root.pages.length > 0) {
             Plasmoid.configuration.noteText = root.pages[0] || "";
         }
+        root.isApplyingConfig = false;
+        root.kconfigHadData = true;
+        root.hasUnsavedChanges = false;
 
-        var combinedText = root.pages.join(root.pageBreakDelimiter);
-        var b64Text = Qt.btoa(unescape(encodeURIComponent(combinedText)));
-        executableDataSource.connectSource("echo '" + b64Text + "' | base64 -d > \"$HOME/.config/plasma-custom-textnote-text.txt\"; echo 'done'");
+        writeBackupFile();
     }
 
     function switchPage(newIndex) {
@@ -78,15 +102,11 @@ PlasmoidItem {
         syncCurrentText();
 
         root.currentPageIndex = newIndex;
+        root.isApplyingConfig = true;
         Plasmoid.configuration.currentPage = newIndex;
+        root.isApplyingConfig = false;
 
-        if (root.textAreaInstance) {
-            root.disableSave = true;
-            root.textAreaInstance.text = root.pages[newIndex] || "";
-            root.textAreaInstance.cursorPosition = 0;
-            root.disableSave = false;
-        }
-
+        applyCurrentPageToEditor();
         saveNote();
     }
 
@@ -99,13 +119,12 @@ PlasmoidItem {
 
         var newIndex = root.pages.length - 1;
         root.currentPageIndex = newIndex;
+        root.isApplyingConfig = true;
         Plasmoid.configuration.currentPage = newIndex;
+        root.isApplyingConfig = false;
 
+        applyCurrentPageToEditor();
         if (root.textAreaInstance) {
-            root.disableSave = true;
-            root.textAreaInstance.text = "";
-            root.textAreaInstance.cursorPosition = 0;
-            root.disableSave = false;
             root.textAreaInstance.forceActiveFocus();
         }
 
@@ -122,27 +141,27 @@ PlasmoidItem {
 
         var nextIndex = Math.min(root.currentPageIndex, root.pages.length - 1);
         root.currentPageIndex = nextIndex;
+        root.isApplyingConfig = true;
         Plasmoid.configuration.currentPage = nextIndex;
+        root.isApplyingConfig = false;
 
-        if (root.textAreaInstance) {
-            root.disableSave = true;
-            root.textAreaInstance.text = root.pages[nextIndex] || "";
-            root.textAreaInstance.cursorPosition = 0;
-            root.disableSave = false;
-        }
-
+        applyCurrentPageToEditor();
         saveNote();
     }
 
     Connections {
         target: Plasmoid.configuration
         function onNotePagesChanged() {
+            if (root.isApplyingConfig) return;
             root.initPages();
+            root.writeBackupFile();
         }
         function onCurrentPageChanged() {
+            if (root.isApplyingConfig) return;
             var newIdx = Math.min(Math.max(0, Plasmoid.configuration.currentPage || 0), root.pages.length - 1);
             if (newIdx !== root.currentPageIndex) {
-                root.switchPage(newIdx);
+                root.currentPageIndex = newIdx;
+                root.applyCurrentPageToEditor();
             }
         }
     }
@@ -154,7 +173,7 @@ PlasmoidItem {
         onNewData: (sourceName, data) => {
             disconnectSource(sourceName)
 
-            if (sourceName.indexOf("plasma-custom-textnote-text.txt") !== -1 && sourceName.indexOf("cat ") !== -1) {
+            if (sourceName.indexOf("plasma-custom-textnote-text.txt") !== -1 && sourceName.indexOf("cat ") !== -1 && !root.kconfigHadData) {
                 var stdout = data["stdout"] || "";
                 var b64Text = stdout.replace(/\s+/g, '');
                 if (b64Text.length > 0) {
@@ -174,16 +193,15 @@ PlasmoidItem {
                             loadedPages = [decodedText];
                         }
                         if (loadedPages.length > 0) {
-                            root.disableSave = true;
                             root.pages = loadedPages;
                             root.currentPageIndex = Math.min(root.currentPageIndex, loadedPages.length - 1);
-                            if (root.textAreaInstance) {
-                                root.textAreaInstance.text = loadedPages[root.currentPageIndex] || "";
-                            }
+                            root.kconfigHadData = true;
+                            root.applyCurrentPageToEditor();
+                            root.isApplyingConfig = true;
                             Plasmoid.configuration.notePages = JSON.stringify(loadedPages);
                             Plasmoid.configuration.currentPage = root.currentPageIndex;
                             Plasmoid.configuration.noteText = loadedPages[0] || "";
-                            root.disableSave = false;
+                            root.isApplyingConfig = false;
                         }
                     } catch(e) {
                         console.log("Error decoding text note: " + e);
@@ -236,7 +254,6 @@ PlasmoidItem {
                 id: textArea
                 width: scrollView.availableWidth
                 height: Math.max(implicitHeight, scrollView.availableHeight)
-                text: root.pages[root.currentPageIndex] || ""
                 color: Plasmoid.configuration.textColor
                 font.pixelSize: Plasmoid.configuration.textSize
                 font.family: Plasmoid.configuration.fontFamily
@@ -265,8 +282,8 @@ PlasmoidItem {
                         var pos = point.position;
                         var lineH = (textArea.lineCount > 0 && textArea.contentHeight > 0)
                             ? (textArea.contentHeight / textArea.lineCount)
-                            : (textArea.font.pixelSize * 1.3);
-                        if (pos.y > textArea.topPadding + textArea.contentHeight || textArea.text.length === 0) {
+                            : Math.max(1, textArea.font.pixelSize * 1.3);
+                        if (lineH > 0 && (pos.y > textArea.topPadding + textArea.contentHeight || textArea.text.length === 0)) {
                             var clickedRow = Math.max(0, Math.floor((pos.y - textArea.topPadding) / lineH));
                             var currentLastRow = Math.max(0, textArea.lineCount - 1);
                             var linesToAdd = clickedRow - (textArea.text.length === 0 ? 0 : currentLastRow);
@@ -281,7 +298,8 @@ PlasmoidItem {
 
                 onTextChanged: {
                     if (!root.disableSave) {
-                        saveTimer.restart()
+                        root.hasUnsavedChanges = true;
+                        saveTimer.restart();
                     }
                 }
                 Component.onCompleted: {
@@ -289,7 +307,9 @@ PlasmoidItem {
                     root.initPages();
                 }
                 Component.onDestruction: {
-                    root.saveNote();
+                    if (root.hasUnsavedChanges) {
+                        root.saveNote();
+                    }
                     root.textAreaInstance = null;
                 }
             }
@@ -373,6 +393,34 @@ PlasmoidItem {
                 visible: root.pages.length <= 1
             }
 
+            // Delete Page Button (shown when multiple pages exist)
+            Rectangle {
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 22
+                radius: 5
+                visible: root.pages.length > 1
+                color: deleteMouseArea.containsMouse ? Qt.rgba(1, 0.3, 0.3, 0.3) : Qt.rgba(1, 1, 1, 0.1)
+                border.color: deleteMouseArea.containsMouse ? Qt.rgba(1, 0.4, 0.4, 0.6) : Qt.rgba(1, 1, 1, 0.25)
+                border.width: 1
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "-"
+                    color: Plasmoid.configuration.textColor
+                    font.pixelSize: 13
+                    font.bold: true
+                }
+
+                MouseArea {
+                    id: deleteMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.deletePage(root.currentPageIndex)
+                }
+            }
+
             // Add Page Button at far right
             Rectangle {
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
@@ -412,10 +460,14 @@ PlasmoidItem {
 
     Component.onCompleted: {
         root.initPages();
-        executableDataSource.connectSource("cat \"$HOME/.config/plasma-custom-textnote-text.txt\" | base64");
+        if (!root.kconfigHadData) {
+            executableDataSource.connectSource("cat \"$HOME/.config/plasma-custom-textnote-text.txt\" 2>/dev/null | base64");
+        }
     }
 
     Component.onDestruction: {
-        root.saveNote();
+        if (root.hasUnsavedChanges) {
+            root.saveNote();
+        }
     }
 }

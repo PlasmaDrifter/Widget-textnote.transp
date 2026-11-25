@@ -128,7 +128,7 @@ KCM.SimpleKCM {
             }
             
             QQC2.Label {
-                text: generalPage.cfg_textColor
+                text: generalPage.cfg_textColor.toString()
             }
         }
         
@@ -152,9 +152,13 @@ KCM.SimpleKCM {
         QQC2.ComboBox {
             id: fontFamilyCombo
             Kirigami.FormData.label: "Font Family:"
-            model: Qt.fontFamilies().sort()
+            readonly property var sortedFamilies: Qt.fontFamilies().sort()
+            model: sortedFamilies
             Layout.fillWidth: true
-            currentIndex: Math.max(0, model.indexOf(generalPage.cfg_fontFamily))
+            Component.onCompleted: {
+                var idx = sortedFamilies.indexOf(generalPage.cfg_fontFamily);
+                if (idx >= 0) currentIndex = idx;
+            }
             onActivated: {
                 generalPage.cfg_fontFamily = currentText
             }

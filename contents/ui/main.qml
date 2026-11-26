@@ -210,7 +210,15 @@ PlasmoidItem {
             }
         }
     }
-    
+
+    Timer {
+        id: saveTimer
+        interval: 500
+        onTriggered: {
+            root.saveNote()
+        }
+    }
+
     compactRepresentation: Item {
         Kirigami.Icon {
             anchors.fill: parent
@@ -446,14 +454,6 @@ PlasmoidItem {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.addPage()
                 }
-            }
-        }
-        
-        Timer {
-            id: saveTimer
-            interval: 500
-            onTriggered: {
-                root.saveNote()
             }
         }
     }
